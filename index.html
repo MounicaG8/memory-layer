@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MemoryLayer — AI That Remembers Like a Human</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0D0F14;--bg2:#13161E;--bg3:#1A1E29;--border:#252A38;
+  --amber:#E8A545;--amber-dim:rgba(232,165,69,0.12);
+  --slate:#4A9EBF;--slate-dim:rgba(74,158,191,0.12);
+  --green:#1D9E75;--red:#E05555;
+  --text:#E8EAF0;--text2:#8B91A8;--text3:#3D4155;
+  --vivid:#E8A545;--clear:#7CB8D4;--faded:#6B7A5A;--vague:#4A5068;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;font-size:15px;line-height:1.6;min-height:100vh}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:16px 32px;background:rgba(13,15,20,0.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+.nav-logo{font-size:18px;font-weight:700;letter-spacing:-0.5px;color:var(--text)}
+.nav-logo span{color:var(--amber)}
+.nav-pill{font-size:12px;font-weight:500;background:rgba(232,165,69,0.12);color:var(--amber);border:1px solid rgba(232,165,69,0.25);padding:4px 12px;border-radius:20px}
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:100px 24px 60px;text-align:center;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:radial-gradient(ellipse 80% 50% at 50% -10%,rgba(232,165,69,0.08) 0%,transparent 70%);pointer-events:none}
+.hero-eyebrow{font-size:12px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--amber);margin-bottom:20px}
+.hero-title{font-size:clamp(36px,6vw,72px);font-weight:700;letter-spacing:-2px;line-height:1.05;color:var(--text);margin-bottom:24px}
+.hero-title em{color:var(--amber);font-style:normal}
+.hero-sub{font-size:clamp(16px,2vw,20px);color:var(--text2);max-width:600px;line-height:1.7;margin-bottom:48px}
+.hero-cta{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+.btn-primary{background:var(--amber);color:#0D0F14;font-size:15px;font-weight:600;padding:13px 28px;border-radius:8px;border:none;cursor:pointer;transition:opacity 0.2s,transform 0.15s;text-decoration:none;display:inline-block}
+.btn-primary:hover{opacity:0.88;transform:translateY(-1px)}
+.btn-ghost{background:transparent;color:var(--text2);font-size:15px;font-weight:500;padding:13px 28px;border-radius:8px;border:1px solid var(--border);cursor:pointer;transition:border-color 0.2s,color 0.2s;text-decoration:none;display:inline-block}
+.btn-ghost:hover{border-color:var(--text2);color:var(--text)}
+.timeline-section{padding:80px 24px;display:flex;flex-direction:column;align-items:center}
+.section-label{font-size:12px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--amber);margin-bottom:12px}
+.section-title{font-size:clamp(24px,4vw,38px);font-weight:700;letter-spacing:-0.8px;text-align:center;margin-bottom:12px}
+.section-sub{color:var(--text2);text-align:center;max-width:520px;margin-bottom:56px}
+.timeline-track{width:100%;max-width:800px;position:relative;padding:0 20px}
+.timeline-line{position:absolute;top:18px;left:20px;right:20px;height:2px;background:linear-gradient(to right,var(--vague),var(--faded),var(--clear),var(--vivid));border-radius:2px}
+.timeline-nodes{display:flex;justify-content:space-between;position:relative;z-index:2}
+.tnode{display:flex;flex-direction:column;align-items:center;gap:12px;cursor:pointer}
+.tnode-dot{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;transition:transform 0.2s;border:2px solid transparent}
+.tnode:hover .tnode-dot{transform:scale(1.15)}
+.tnode-age{font-size:11px;color:var(--text2);text-align:center}
+.tnode-label{font-size:12px;font-weight:500;text-align:center;max-width:90px;line-height:1.3}
+.tnode.forgotten .tnode-dot{background:var(--bg3);border-color:var(--vague);color:var(--text3)}
+.tnode.vague .tnode-dot{background:rgba(61,65,85,0.4);border-color:var(--vague);color:var(--text3)}
+.tnode.faded .tnode-dot{background:rgba(107,122,90,0.25);border-color:var(--faded);color:var(--faded)}
+.tnode.clear .tnode-dot{background:rgba(124,184,212,0.2);border-color:var(--clear);color:var(--clear)}
+.tnode.vivid .tnode-dot{background:rgba(232,165,69,0.2);border-color:var(--amber);color:var(--amber)}
+.timeline-callout{margin-top:40px;padding:20px 24px;background:var(--bg2);border:1px solid var(--border);border-radius:12px;max-width:800px;width:100%;min-height:80px;transition:all 0.3s}
+.callout-fidelity{font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px}
+.callout-text{font-family:Georgia,serif;font-size:16px;line-height:1.7;color:var(--text)}
+.callout-meta{font-size:12px;color:var(--text2);margin-top:8px}
+.demo-section{padding:80px 24px;background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.demo-inner{max-width:1100px;margin:0 auto}
+.demo-controls{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-bottom:40px}
+.scenario-btn{font-size:13px;font-weight:500;padding:8px 18px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text2);cursor:pointer;transition:all 0.2s}
+.scenario-btn.active,.scenario-btn:hover{border-color:var(--amber);color:var(--amber);background:rgba(232,165,69,0.08)}
+.split-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:700px){.split-grid{grid-template-columns:1fr}}
+.chat-panel{border-radius:14px;border:1px solid var(--border);overflow:hidden}
+.chat-header{padding:14px 18px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border)}
+.chat-header-dot{width:8px;height:8px;border-radius:50%}
+.chat-header-name{font-size:13px;font-weight:600}
+.chat-header-tag{font-size:11px;padding:2px 8px;border-radius:4px;font-weight:500;margin-left:auto}
+.standard-panel{background:rgba(74,158,191,0.04)}
+.standard-panel .chat-header{background:rgba(74,158,191,0.08)}
+.standard-panel .chat-header-dot{background:var(--slate)}
+.standard-panel .chat-header-name{color:var(--slate)}
+.standard-panel .chat-header-tag{background:rgba(74,158,191,0.12);color:var(--slate)}
+.memory-panel{background:rgba(232,165,69,0.04)}
+.memory-panel .chat-header{background:rgba(232,165,69,0.08)}
+.memory-panel .chat-header-dot{background:var(--amber)}
+.memory-panel .chat-header-name{color:var(--amber)}
+.memory-panel .chat-header-tag{background:rgba(232,165,69,0.12);color:var(--amber)}
+.chat-body{padding:20px;min-height:280px}
+.msg{margin-bottom:16px}
+.msg-role{font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:5px}
+.msg-user .msg-role{color:var(--text2)}
+.msg-ai .msg-role{color:var(--amber)}
+.standard-panel .msg-ai .msg-role{color:var(--slate)}
+.msg-bubble{padding:12px 16px;border-radius:10px;font-family:Georgia,serif;font-size:15px;line-height:1.7;display:inline-block;max-width:100%}
+.msg-user .msg-bubble{background:var(--bg3);color:var(--text2);border-radius:10px 10px 10px 2px}
+.msg-ai .msg-bubble{border-radius:2px 10px 10px 10px}
+.standard-panel .msg-ai .msg-bubble{background:rgba(74,158,191,0.1);color:var(--text)}
+.memory-panel .msg-ai .msg-bubble{background:rgba(232,165,69,0.09);color:var(--text)}
+.memory-footer{padding:12px 18px;border-top:1px solid var(--border);display:flex;flex-wrap:wrap;gap:8px}
+.mem-chip{font-size:11px;padding:3px 9px;border-radius:4px;border:1px solid var(--border);color:var(--text2);display:flex;align-items:center;gap:5px}
+.mem-chip-dot{width:6px;height:6px;border-radius:50%}
+.how-section{padding:80px 24px}
+.how-grid{max-width:900px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:24px}
+.how-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:28px 24px;transition:border-color 0.2s}
+.how-card:hover{border-color:rgba(232,165,69,0.4)}
+.how-icon{width:44px;height:44px;border-radius:10px;background:rgba(232,165,69,0.1);display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:16px}
+.how-card h3{font-size:16px;font-weight:600;margin-bottom:8px}
+.how-card p{font-size:14px;color:var(--text2);line-height:1.6}
+.decay-section{padding:80px 24px;background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.decay-inner{max-width:780px;margin:0 auto}
+.decay-slider-wrap{display:flex;align-items:center;gap:16px;margin-bottom:32px}
+.decay-slider-wrap label{font-size:13px;color:var(--text2);white-space:nowrap}
+input[type=range]{flex:1;accent-color:var(--amber);cursor:pointer}
+.decay-time-label{font-size:14px;font-weight:600;color:var(--amber);min-width:120px;text-align:right}
+.decay-bars{display:flex;flex-direction:column;gap:10px}
+.dbar-row{display:flex;align-items:center;gap:12px}
+.dbar-label{font-size:12px;color:var(--text2);width:170px;flex-shrink:0;text-align:right}
+.dbar-track{flex:1;height:22px;background:var(--bg3);border-radius:4px;overflow:hidden;border:1px solid var(--border)}
+.dbar-fill{height:100%;border-radius:4px;display:flex;align-items:center;padding:0 8px;transition:width 0.5s ease}
+.dbar-val{font-size:11px;font-weight:600;color:#fff;white-space:nowrap}
+.dbar-fidelity{font-size:11px;color:var(--text2);min-width:60px}
+.domains-section{padding:80px 24px}
+.domains-grid{max-width:900px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
+.domain-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:22px 20px;cursor:pointer;transition:border-color 0.2s,transform 0.15s}
+.domain-card:hover{border-color:rgba(232,165,69,0.4);transform:translateY(-2px)}
+.domain-emoji{font-size:28px;margin-bottom:10px}
+.domain-name{font-size:15px;font-weight:600;margin-bottom:4px}
+.domain-desc{font-size:13px;color:var(--text2);line-height:1.5}
+footer{padding:40px 32px;border-top:1px solid var(--border);text-align:center;color:var(--text2);font-size:13px}
+footer strong{color:var(--amber)}
+.centered{display:flex;flex-direction:column;align-items:center}
+.fade-in{animation:fadeIn 0.5s ease forwards}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+<nav>
+  <div class="nav-logo">Memory<span>Layer</span></div>
+  <div class="nav-pill">Provisional Patent Filed · June 2026</div>
+</nav>
+
+<section class="hero">
+  <div class="hero-eyebrow">A new kind of AI memory</div>
+  <h1 class="hero-title">AI that remembers<br><em>the way you do</em></h1>
+  <p class="hero-sub">Vivid for last week. Hazy for last year. And the moments that truly mattered? Those it never forgets. This is what AI memory should feel like.</p>
+  <div class="hero-cta">
+    <a href="#demo" class="btn-primary">See the difference</a>
+    <a href="#how" class="btn-ghost">How it works</a>
+  </div>
+</section>
+
+<section class="timeline-section centered" id="timeline">
+  <div class="section-label">The core idea</div>
+  <h2 class="section-title">Memory fades with time — and that's the point</h2>
+  <p class="section-sub">Click any moment on the timeline to see how an AI using MemoryLayer speaks about that memory.</p>
+  <div class="timeline-track">
+    <div class="timeline-line"></div>
+    <div class="timeline-nodes" id="timelineNodes"></div>
+  </div>
+  <div class="timeline-callout" id="timelineCallout">
+    <div class="callout-fidelity" id="calloutFidelity"></div>
+    <div class="callout-text" id="calloutText">Click a memory above to see how the AI references it</div>
+    <div class="callout-meta" id="calloutMeta"></div>
+  </div>
+</section>
+
+<section class="demo-section" id="demo">
+  <div class="demo-inner">
+    <div class="centered" style="margin-bottom:40px">
+      <div class="section-label">Live comparison</div>
+      <h2 class="section-title">Standard AI vs MemoryLayer</h2>
+      <p class="section-sub">Same conversation. Same memories. Feel the difference.</p>
+    </div>
+    <div class="demo-controls" id="scenarioBtns"></div>
+    <div class="split-grid">
+      <div class="chat-panel standard-panel">
+        <div class="chat-header">
+          <div class="chat-header-dot"></div>
+          <div class="chat-header-name">Standard AI</div>
+          <div class="chat-header-tag">Flat memory</div>
+        </div>
+        <div class="chat-body" id="standardChat"></div>
+      </div>
+      <div class="chat-panel memory-panel">
+        <div class="chat-header">
+          <div class="chat-header-dot"></div>
+          <div class="chat-header-name">MemoryLayer AI</div>
+          <div class="chat-header-tag">Human-like memory</div>
+        </div>
+        <div class="chat-body" id="memoryChat"></div>
+        <div class="memory-footer" id="memoryFooter"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="decay-section" id="decay">
+  <div class="decay-inner">
+    <div class="centered" style="margin-bottom:40px">
+      <div class="section-label">The mechanism</div>
+      <h2 class="section-title">Watch memories fade in real time</h2>
+      <p class="section-sub">Drag the slider. Notice how emotional memories resist forgetting.</p>
+    </div>
+    <div class="decay-slider-wrap">
+      <label>Time since events</label>
+      <input type="range" id="decaySlider" min="0" max="100" value="20">
+      <div class="decay-time-label" id="decayTimeLabel">A few weeks</div>
+    </div>
+    <div class="decay-bars" id="decayBars"></div>
+  </div>
+</section>
+
+<section class="how-section centered" id="how">
+  <div class="section-label">Under the hood</div>
+  <h2 class="section-title" style="margin-bottom:12px">Seven mechanisms working together</h2>
+  <p class="section-sub" style="margin-bottom:48px">Each one mirrors a real property of human memory — backed by neuroscience. 102 tests passing.</p>
+  <div class="how-grid">
+    <div class="how-card">
+      <div class="how-icon">⏳</div>
+      <h3>Temporal decay</h3>
+      <p>Ebbinghaus curve with smooth age-at-encoding modulation. Childhood amnesia and reminiscence bump modelled.</p>
+    </div>
+    <div class="how-card">
+      <div class="how-icon">❤️</div>
+      <h3>Emotional anchoring</h3>
+      <p>High-emotion memories decay 3× slower and have a permanent floor. The moments that mattered never fully disappear.</p>
+    </div>
+    <div class="how-card">
+      <div class="how-icon">👁️</div>
+      <h3>Fidelity degradation</h3>
+      <p>Weak memories return a gist, not verbatim text. Six levels — vivid, clear, faded, vague, feeling, forgotten.</p>
+    </div>
+    <div class="how-card">
+      <div class="how-icon">🔁</div>
+      <h3>Spaced repetition</h3>
+      <p>Each time a memory is recalled it is reinforced — just like studying. Frequently referenced memories stay sharper.</p>
+    </div>
+    <div class="how-card">
+      <div class="how-icon">🌐</div>
+      <h3>Spreading activation</h3>
+      <p>Retrieving one memory primes related ones. Emotion-gated, embedding-based. Collins and Loftus 1975.</p>
+    </div>
+    <div class="how-card">
+      <div class="how-icon">🔄</div>
+      <h3>Reconsolidation</h3>
+      <p>Weak memories drift toward current context on recall — capped at 3 drifts, original always preserved.</p>
+    </div>
+    <div class="how-card">
+      <div class="how-icon">🌙</div>
+      <h3>Sleep simulation</h3>
+      <p>NREM replay adds repetitions. Episodic consolidation tagging. Poor quality sleep provides no benefit.</p>
+    </div>
+  </div>
+</section>
+
+<section class="domains-section centered">
+  <div class="section-label">Applications</div>
+  <h2 class="section-title" style="margin-bottom:12px">Where this changes everything</h2>
+  <p class="section-sub" style="margin-bottom:48px">Any AI that interacts with the same person over time benefits from human-like memory.</p>
+  <div class="domains-grid">
+    <div class="domain-card">
+      <div class="domain-emoji">🎮</div>
+      <div class="domain-name">Video games</div>
+      <div class="domain-desc">NPCs that remember your heroism from 6 months ago — vaguely, warmly, the way a person would.</div>
+    </div>
+    <div class="domain-card">
+      <div class="domain-emoji">💬</div>
+      <div class="domain-name">Virtual companions</div>
+      <div class="domain-desc">AI companions that carry the weight of your history — not as a log, but as a living relationship.</div>
+    </div>
+    <div class="domain-card">
+      <div class="domain-emoji">🎵</div>
+      <div class="domain-name">Streaming and taste</div>
+      <div class="domain-desc">Recommendations shaped by who you are now — not an average of your entire history.</div>
+    </div>
+    <div class="domain-card">
+      <div class="domain-emoji">🤝</div>
+      <div class="domain-name">Personal AI</div>
+      <div class="domain-desc">An assistant that grows with you over years, remembering what matters and letting the rest fade.</div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p><strong>MemoryLayer</strong> — Provisional patent filed June 2026 · Indian Patent Office · Application 202641071906</p>
+  <p style="margin-top:8px">pip install "memorylayer[full]" · Built by <strong>Mounica Goriparti</strong> · Hyderabad, India</p>
+  <p style="margin-top:8px;font-size:11px">Ebbinghaus forgetting curve · Emotional anchoring · Fidelity-degraded retrieval · 102 tests passing</p>
+</footer>
+
+<script>
+const TIMELINE_MEMORIES=[
+  {age:'12 years ago',emoji:'🌅',label:'Childhood moment',fidelity:'forgotten',strength:0.04,ai_text:'I have no specific memory of that time — only a vague sense that something happened. The details are completely gone.',emotional:0.2},
+  {age:'5 years ago',emoji:'🎓',label:'Big achievement',fidelity:'vague',strength:0.09,ai_text:'I have a faint sense that something significant happened around that time — something you were proud of. I am quite uncertain about the details.',emotional:0.65},
+  {age:'1 year ago',emoji:'💔',label:'Difficult period',fidelity:'faded',strength:0.28,ai_text:'I vaguely recall you going through something hard around that time — something that affected you deeply. I am not entirely sure of the specifics, but I remember it felt heavy.',emotional:0.9},
+  {age:'3 months ago',emoji:'🏆',label:'Major win',fidelity:'clear',strength:0.56,ai_text:'I remember you achieved something significant — a real milestone that you had been working toward. You were genuinely proud of it.',emotional:0.75},
+  {age:'Last week',emoji:'💡',label:'New project',fidelity:'vivid',strength:0.94,ai_text:'I clearly remember — you just started working on a new project that you are really excited about. You told me you have been thinking about it for months and it finally feels real.',emotional:0.5},
+];
+
+const FIDELITY_COLORS={forgotten:'#3D4155',vague:'#4A5068',faded:'#6B7A5A',clear:'#7CB8D4',vivid:'#E8A545'};
+const FIDELITY_LABELS={forgotten:'FORGOTTEN — no detail survives',vague:'VAGUE — only a faint impression',faded:'FADED — gist without detail',clear:'CLEAR — most details intact',vivid:'VIVID — full fidelity'};
+
+const SCENARIOS=[
+  {id:'companion',label:'💬 Companion',user_msg:'Hey, do you remember what I was going through last year?',time_label:'Asked 14 months after the event',
+   standard_response:'Based on my records from 14 months ago: "User mentioned going through a difficult breakup and feeling lost. User stated they felt isolated. User asked for advice on moving forward."\n\nIs there anything specific about that period you would like to discuss?',
+   memory_response:'I remember you were going through something really hard around that time — I think it had to do with a relationship ending, and feeling quite alone with it. I am hazy on the details now, but I remember it felt like a heavy stretch for you.\n\nAre you thinking about that time for a reason?',
+   memory_chips:[{label:'Difficult breakup',fidelity:'faded',color:'#6B7A5A'},{label:'Felt isolated',fidelity:'faded',color:'#6B7A5A'},{label:'High emotion',fidelity:'vivid',color:'#E8A545'}]},
+  {id:'game',label:'🎮 Game NPC',user_msg:'Mira, do you remember me?',time_label:'Player returns 8 months later',
+   standard_response:'Player ID: HERO_001. Interaction log:\n• 8 months ago: Saved blacksmith\'s son from bandits. Reward: +500 reputation.\n• 7 months ago: Purchased iron longsword (50 gold).\n• 3 months ago: Negotiated rudely. Reputation: -20.\n• Last week: Armor repair (20 gold).\n\nHow can I assist you today?',
+   memory_response:'You look familiar... I feel like we have met before. Something tells me you have done me a kindness once — something with my boy, I think. I cannot quite place it now, it was so long ago.\n\nMore recently — did you not bring something in for repair? That I remember more clearly.\n\nWhat brings you to my forge?',
+   memory_chips:[{label:'Saved son — vivid',fidelity:'vivid',color:'#E8A545'},{label:'Sword purchase — vague',fidelity:'vague',color:'#4A5068'},{label:'Armor repair — clear',fidelity:'clear',color:'#7CB8D4'}]},
+  {id:'personal',label:'🤖 Personal AI',user_msg:'What do you know about my career goals?',time_label:'Asked after 2 years of daily use',
+   standard_response:'Based on stored data:\n• 2 years ago: "User wants to become a senior engineer."\n• 18 months ago: "User mentioned interest in management."\n• 6 months ago: "User is preparing for Staff Engineer interview."\n• 2 weeks ago: "User working on AI side project."\n\nAll records available. Which would you like to discuss?',
+   memory_response:'From what I know about you — and we have talked about this a lot over the years — there has been a real evolution. Early on, I remember you were very focused on the technical track. That part I am a bit hazy on now.\n\nMore recently, and this is much clearer to me, you have been building something of your own in AI — and that seems to be where your energy really is right now.\n\nWhat is on your mind with it?',
+   memory_chips:[{label:'Early goals — faded',fidelity:'faded',color:'#6B7A5A'},{label:'Staff Eng prep — clear',fidelity:'clear',color:'#7CB8D4'},{label:'AI project — vivid',fidelity:'vivid',color:'#E8A545'}]},
+];
+
+const DECAY_EVENTS=[
+  {label:"Saved someone's life",emotional:0.95,importance:0.9},
+  {label:'Heard great news',emotional:0.80,importance:0.75},
+  {label:'A difficult conversation',emotional:0.70,importance:0.65},
+  {label:'Completed a big project',emotional:0.50,importance:0.6},
+  {label:'Had lunch, caught up',emotional:0.25,importance:0.4},
+  {label:'Bought something online',emotional:0.05,importance:0.2},
+];
+
+function buildTimeline(){
+  const c=document.getElementById('timelineNodes');
+  TIMELINE_MEMORIES.forEach(mem=>{
+    const node=document.createElement('div');
+    node.className='tnode '+mem.fidelity;
+    node.innerHTML='<div class="tnode-dot">'+mem.emoji+'</div><div class="tnode-age">'+mem.age+'</div><div class="tnode-label">'+mem.label+'</div>';
+    node.addEventListener('click',()=>showTimelineCallout(mem));
+    c.appendChild(node);
+  });
+}
+
+function showTimelineCallout(mem){
+  const color=FIDELITY_COLORS[mem.fidelity];
+  document.getElementById('calloutFidelity').innerHTML='<span style="color:'+color+'">'+FIDELITY_LABELS[mem.fidelity]+'</span> &nbsp;·&nbsp; <span style="color:var(--text2)">strength '+Math.round(mem.strength*100)+'% &nbsp;·&nbsp; emotional weight '+Math.round(mem.emotional*100)+'%</span>';
+  document.getElementById('calloutText').textContent=mem.ai_text;
+  document.getElementById('calloutMeta').textContent=mem.emotional>0.6?'High emotional weight — this memory decays 3x slower than a neutral one at the same age.':'This memory has low emotional weight — it fades at the standard rate.';
+}
+
+function buildScenarioBtns(){
+  const c=document.getElementById('scenarioBtns');
+  SCENARIOS.forEach((s,i)=>{
+    const btn=document.createElement('button');
+    btn.className='scenario-btn'+(i===0?' active':'');
+    btn.textContent=s.label;
+    btn.addEventListener('click',()=>{
+      document.querySelectorAll('.scenario-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      renderScenario(i);
+    });
+    c.appendChild(btn);
+  });
+}
+
+function renderScenario(idx){
+  const s=SCENARIOS[idx];
+  document.getElementById('standardChat').innerHTML='<div style="font-size:11px;color:var(--text3);margin-bottom:14px;font-style:italic">'+s.time_label+'</div><div class="msg msg-user"><div class="msg-role">You</div><div class="msg-bubble">'+s.user_msg+'</div></div><div class="msg msg-ai" style="margin-top:12px"><div class="msg-role">AI</div><div class="msg-bubble" style="font-family:monospace;font-size:13px;line-height:1.6;white-space:pre-line">'+s.standard_response+'</div></div>';
+  document.getElementById('memoryChat').innerHTML='<div style="font-size:11px;color:var(--text3);margin-bottom:14px;font-style:italic">'+s.time_label+'</div><div class="msg msg-user"><div class="msg-role">You</div><div class="msg-bubble">'+s.user_msg+'</div></div><div class="msg msg-ai" style="margin-top:12px"><div class="msg-role">MemoryLayer AI</div><div class="msg-bubble" style="white-space:pre-line">'+s.memory_response+'</div></div>';
+  const footer=document.getElementById('memoryFooter');
+  footer.innerHTML='<span style="font-size:11px;color:var(--text3);margin-right:4px">Active memories:</span>';
+  s.memory_chips.forEach(chip=>{footer.innerHTML+='<div class="mem-chip"><div class="mem-chip-dot" style="background:'+chip.color+'"></div>'+chip.label+'</div>';});
+}
+
+function decayStrength(ev,t){
+  const s=1+(ev.emotional*2.5)+0.3;
+  const r=Math.exp(-t/(s*30))*ev.importance;
+  return Math.max(ev.emotional*0.18,Math.min(1.0,r));
+}
+
+function fidFromStrength(s){
+  if(s>=0.70)return{lbl:'vivid',col:'#1D9E75'};
+  if(s>=0.45)return{lbl:'clear',col:'#7CB8D4'};
+  if(s>=0.22)return{lbl:'faded',col:'#6B7A5A'};
+  if(s>=0.08)return{lbl:'vague',col:'#4A5068'};
+  if(s>=0.03)return{lbl:'feeling',col:'#3D4155'};
+  return{lbl:'forgotten',col:'#2C2C2A'};
+}
+
+function timeLabel(t){
+  if(t<5)return'Just happened';
+  if(t<18)return'A few weeks ago';
+  if(t<38)return'A few months ago';
+  if(t<60)return'About a year ago';
+  if(t<80)return'Several years ago';
+  return'A long time ago';
+}
+
+function renderDecayBars(t){
+  document.getElementById('decayTimeLabel').textContent=timeLabel(+t);
+  const c=document.getElementById('decayBars');
+  c.innerHTML='';
+  DECAY_EVENTS.forEach(ev=>{
+    const s=decayStrength(ev,+t);
+    const pct=Math.max(3,s*100);
+    const f=fidFromStrength(s);
+    c.innerHTML+='<div class="dbar-row"><div class="dbar-label">'+ev.label+'</div><div class="dbar-track"><div class="dbar-fill" style="width:'+pct.toFixed(1)+'%;background:'+f.col+'22;border-right:2px solid '+f.col+'"><span class="dbar-val" style="color:'+f.col+'">'+Math.round(s*100)+'%</span></div></div><div class="dbar-fidelity" style="color:'+f.col+';font-size:11px;font-weight:500">'+f.lbl+'</div></div>';
+  });
+}
+
+document.addEventListener('DOMContentLoaded',()=>{
+  buildTimeline();
+  buildScenarioBtns();
+  renderScenario(0);
+  const slider=document.getElementById('decaySlider');
+  renderDecayBars(parseInt(slider.value));
+  slider.addEventListener('input',()=>renderDecayBars(parseInt(slider.value)));
+  showTimelineCallout(TIMELINE_MEMORIES[2]);
+});
+</script>
+</body>
+</html>
