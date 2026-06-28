@@ -1,3 +1,22 @@
+
+# MemoryLayer — Human-like AI Memory System
+# Copyright 2026 Goriparti Mounica
+# 
+# Licensed under the Apache License, Version 2.0
+#
+# PATENT NOTICE: This software implements methods 
+# covered by provisional patent application 
+# IN/PA/2026/202641071906 filed with the Indian 
+# Patent Office on June 10, 2026. The following 
+# mechanisms are patent-pending:
+# 1. Emotionally-modulated temporal decay rate 
+#    with floor effect
+# 2. Fidelity-degraded content retrieval with 
+#    confidence-calibrated natural language expression
+#
+# Commercial use of these patent-pending mechanisms 
+# requires a separate commercial license.
+# Contact: mounica.goriparti@email.com
 """
 MemoryLayer — Decay Engine  (Human-Calibrated v2.0)
 
