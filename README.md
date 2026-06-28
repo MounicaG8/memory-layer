@@ -1,3 +1,4 @@
+License: Apache 2.0 | Patent pending: IN/PA/2026/202641071906
 # MemoryLayer
 
 AI memory that decays, degrades, and drifts the way human memory does.
