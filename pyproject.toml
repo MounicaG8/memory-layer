@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "memorydrift"
+version = "3.0.0"
+description = "AI memory that decays, degrades, and drifts the way human memory does"
+readme = "README.md"
+license = "LicenseRef-Proprietary"
+authors = [
+    {name = "Mounica Goriparti", email = "mounica.goriparti@gmail.com"},
+]
+requires-python = ">=3.9"
+keywords = [
+    "AI memory", "cognitive AI", "LLM", "agent memory",
+    "episodic memory", "memory decay", "NLP",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+# Zero mandatory dependencies — the core is pure Python.
+dependencies = []
+
+[project.optional-dependencies]
+# Real semantic embeddings for spreading activation
+embed  = ["sentence-transformers>=2.2"]
+# Neural emotion classifier (distilroberta-base)
+neural = ["transformers>=4.30", "torch>=2.0"]
+# Interactive web UI
+ui     = ["streamlit>=1.30", "plotly>=5.0", "pandas>=2.0"]
+# Everything
+full   = ["sentence-transformers>=2.2", "transformers>=4.30", "torch>=2.0"]
+
+[project.urls]
+Homepage    = "https://github.com/mounica-goriparti/memorylayer"
+"Bug Tracker" = "https://github.com/mounica-goriparti/memorylayer/issues"
+
+[tool.setuptools.packages.find]
+include = ["memorylayer*"]
