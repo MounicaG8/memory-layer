@@ -6,9 +6,9 @@ AI memory that decays, degrades, and drifts the way human memory does.
 ## Install
 
 ```bash
-pip install memorylayer                # pure-Python core, zero dependencies
-pip install "memorylayer[embed]"       # + real semantic embeddings (all-MiniLM-L6-v2)
-pip install "memorylayer[full]"        # + neural emotion classifier
+pip install memorydrift
+pip install "memorydrift[embed]"
+pip install "memorydrift[full]"
 ```
 
 ## Quickstart
