@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "memorydrift"
-version = "3.0.0"
+version = "3.0.2"
 description = "AI memory that decays, degrades, and drifts the way human memory does"
 readme = "README.md"
 license = "LicenseRef-Proprietary"
